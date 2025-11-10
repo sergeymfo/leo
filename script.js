@@ -1,6 +1,6 @@
 // Конфігурація
 const CONFIG = {
-    bmcUsername: 'serhii', // ⬅️ ЗАМІНІТЬ на ваш Buy Me a Coffee username
+    bmcUsername: 'fwdr', // Ваш Buy Me a Coffee username
     basePrice: 1,          // Базова ціна "кави" на BMC (зазвичай $1)
     minAmount: 10,         // Мінімальна сума в гривнях
     maxAmount: 10000,      // Максимальна сума в гривнях
