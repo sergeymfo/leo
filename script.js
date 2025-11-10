@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initAmountButtons();
     initCustomAmount();
     initDonateButton();
+    initModalHandlers();
     updateUI();
 });
 
@@ -187,31 +188,59 @@ function handleDonate() {
         console.log('Payment data sent to bot');
     }
 
-    // Показуємо повідомлення перед переходом
-    if (tg) {
-        tg.showPopup({
-            title: '✅ Перехід до оплати',
-            message: `Зараз відкриється сторінка оплати.\n\nПісля оплати бонуси зарахуються автоматично протягом 1-2 хвилин!`,
-            buttons: [
-                {
-                    id: 'proceed',
-                    type: 'default',
-                    text: 'Перейти до оплати'
-                },
-                {
-                    id: 'cancel',
-                    type: 'cancel'
-                }
-            ]
-        }, (buttonId) => {
-            if (buttonId === 'proceed') {
-                // Відкриваємо BMC в тому самому вікні
-                window.location.href = bmcUrl;
+    // Відкриваємо modal з BMC iframe
+    openPaymentModal(bmcUrl, selectedAmount);
+}
+
+// Відкрити modal з оплатою
+function openPaymentModal(url, amount) {
+    const modal = document.getElementById('paymentModal');
+    const iframe = document.getElementById('bmcIframe');
+    const modalAmount = document.getElementById('modalAmount');
+
+    // Оновлюємо суму в заголовку
+    modalAmount.textContent = amount;
+
+    // Завантажуємо BMC в iframe
+    iframe.src = url;
+
+    // Показуємо modal
+    modal.classList.remove('hidden');
+
+    console.log('Payment modal opened:', url);
+}
+
+// Закрити modal
+function closePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    const iframe = document.getElementById('bmcIframe');
+
+    // Приховуємо modal
+    modal.classList.add('hidden');
+
+    // Очищуємо iframe
+    iframe.src = '';
+
+    console.log('Payment modal closed');
+}
+
+// Ініціалізація обробників для modal
+function initModalHandlers() {
+    const closeButton = document.getElementById('closeModal');
+    const modal = document.getElementById('paymentModal');
+
+    // Закриття по кнопці
+    if (closeButton) {
+        closeButton.addEventListener('click', closePaymentModal);
+    }
+
+    // Закриття по кліку на backdrop
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closePaymentModal();
             }
         });
-    } else {
-        // Якщо не в Telegram - просто переходимо
-        window.location.href = bmcUrl;
     }
 }
 
