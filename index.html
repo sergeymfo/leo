@@ -1,33 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirect</title>
-    <script>
-        window.onload = function() {
-            // Случайное число от 0 до 1
-            const random = Math.random();
-
-            // Условие перенаправления
-            if (random < 0.6) {
-                // 30% вероятность
-                 // window.location.href = "https://love.love2412.online/go.php?flow=252449-264523-1";
-                     //    window.location.href = "https://t.me/moichatdatingbot?start=flow-252449-264147-1";
-                   //  window.location.href = "https://okbra.net/tg?start=urCafLEY";
-                    window.location.href = "https://t.me/moichatdatingbot?start=flow-252449-264147-1";
-               
-            } else if (random < 0.9) {
-                // 35% вероятность
-                window.location.href = "https://t.me/moichatdatingbot?start=flow-252449-264147-1";
-            } else {
-                // 35% вероятность
-                window.location.href = "https://t.me/moichatdatingbot?start=flow-252449-264147-1";
-            }
-        };
-    </script>
+    <title>Leo Donation</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <p>Загрузка...</p>
+    <div class="container">
+        <div class="header">
+            <div class="avatar">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" fill="#5865F2"/>
+                    <text x="50" y="65" font-size="50" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold">L</text>
+                </svg>
+            </div>
+            <h1>Підтримати Leo</h1>
+            <p class="subtitle">Виберіть суму для підтримки проекту</p>
+        </div>
+
+        <div class="amounts">
+            <button class="amount-button" data-amount="50">
+                <span class="amount">50</span>
+                <span class="currency">₴</span>
+            </button>
+            <button class="amount-button" data-amount="100">
+                <span class="amount">100</span>
+                <span class="currency">₴</span>
+            </button>
+            <button class="amount-button" data-amount="250">
+                <span class="amount">250</span>
+                <span class="currency">₴</span>
+            </button>
+            <button class="amount-button" data-amount="500">
+                <span class="amount">500</span>
+                <span class="currency">₴</span>
+            </button>
+            <button class="amount-button" data-amount="1000">
+                <span class="amount">1000</span>
+                <span class="currency">₴</span>
+            </button>
+        </div>
+
+        <div class="custom-amount">
+            <label for="customAmount">Або введіть свою суму:</label>
+            <div class="input-group">
+                <input
+                    type="number"
+                    id="customAmount"
+                    placeholder="Введіть суму"
+                    min="10"
+                    max="10000"
+                >
+                <span class="currency-label">₴</span>
+            </div>
+        </div>
+
+        <div class="selected-info">
+            <p>Обрана сума: <strong id="selectedAmount">0</strong> ₴</p>
+        </div>
+
+        <button class="donate-button" id="donateButton" disabled>
+            💝 Підтримати проект
+        </button>
+
+        <div class="info">
+            <p class="info-text">
+                Оплата через Buy Me a Coffee<br>
+                Безпечно • Швидко • Зручно
+            </p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
