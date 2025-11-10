@@ -85,23 +85,24 @@ async def bmc_webhook_handler(request):
         # Дані від BMC
         supporter_name = data.get('supporter_name')
         supporter_email = data.get('supporter_email')
-        support_note = data.get('support_note', '')  # ТУТ payment_id!
+        support_note = data.get('support_note', '')
         support_coffees = data.get('support_coffees', 1)
         support_price = data.get('support_coffee_price', 5)
         total_amount = float(support_coffees) * float(support_price)
 
-        # Шукаємо payment_id в note
-        payment_id = support_note.strip()
+        logger.info(f"Payment received: ${total_amount} from {supporter_name}")
 
-        logger.info(f"Looking for payment_id: {payment_id}")
-
-        # Шукаємо pending payment в БД
-        pending = await db.get_pending_payment(payment_id)
+        # АВТОМАТИЧНИЙ ПОШУК: шукаємо pending payment по сумі і часу
+        # Беремо всі pending за останні 30 хвилин з такою сумою
+        pending = await db.find_pending_by_amount_and_time(
+            amount=total_amount,
+            time_window_minutes=30
+        )
 
         if pending and pending.status == 'pending':
             # Знайдено! Оновлюємо статус
             await db.update_payment_status(
-                payment_id=payment_id,
+                payment_id=pending.payment_id,
                 status='completed',
                 completed_at=datetime.now(),
                 bmc_data=data
@@ -123,7 +124,7 @@ async def bmc_webhook_handler(request):
                 parse_mode='HTML'
             )
 
-            logger.info(f"Payment completed: {payment_id}, credited {bonus_amount} credits")
+            logger.info(f"Payment completed: {pending.payment_id}, credited {bonus_amount} credits")
 
             return web.Response(
                 text=json.dumps({'status': 'success', 'message': 'Payment processed'}),
@@ -132,25 +133,11 @@ async def bmc_webhook_handler(request):
             )
 
         else:
-            # Payment ID не знайдено або вже оброблено
+            # Pending payment не знайдено або вже оброблено
             if not pending:
-                logger.warning(f"Payment ID not found: {payment_id}")
-
-                # Fallback: шукаємо по сумі та часу
-                # Якщо є pending payment з такою сумою за останні 30 хвилин
-                recent_pending = await db.find_pending_by_amount(
-                    amount=total_amount,
-                    since=datetime.now() - timedelta(minutes=30)
-                )
-
-                if recent_pending:
-                    # Обробляємо як вище
-                    logger.info(f"Found by amount fallback: {recent_pending.payment_id}")
-                    # ... (той самий код що вище)
-                else:
-                    logger.error("No matching pending payment found")
+                logger.warning(f"No pending payment found for amount ${total_amount} in last 30 minutes")
             else:
-                logger.warning(f"Payment already processed: {payment_id}")
+                logger.warning(f"Payment already processed: {pending.payment_id}")
 
             return web.Response(
                 text=json.dumps({'status': 'warning', 'message': 'Payment ID not found'}),
@@ -234,9 +221,19 @@ class DatabaseExample:
         # Ваша реалізація
         pass
 
-    async def find_pending_by_amount(self, amount, since):
-        """Знайти pending payment по сумі за період"""
+    async def find_pending_by_amount_and_time(self, amount, time_window_minutes):
+        """
+        Знайти перший pending payment по сумі за останні N хвилин (FIFO)
+
+        SELECT * FROM pending_payments
+        WHERE amount = {amount}
+        AND status = 'pending'
+        AND created_at > NOW() - INTERVAL {time_window_minutes} MINUTE
+        ORDER BY created_at ASC
+        LIMIT 1;
+        """
         # Ваша реалізація
+        # Повертає перший (найстаріший) pending з такою сумою
         pass
 
 
