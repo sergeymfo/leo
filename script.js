@@ -1,10 +1,10 @@
 // Конфігурація
 const CONFIG = {
     bmcUsername: 'fwdr', // Ваш Buy Me a Coffee username
-    basePrice: 1,          // Базова ціна "кави" на BMC (зазвичай $1)
-    minAmount: 10,         // Мінімальна сума в гривнях
-    maxAmount: 10000,      // Максимальна сума в гривнях
-    currency: 'UAH'        // Валюта для відображення
+    basePrice: 1,        // Базова ціна "кави" на BMC ($1)
+    minAmount: 1,        // Мінімальна сума в доларах
+    maxAmount: 1000,     // Максимальна сума в доларах
+    currency: 'USD'      // Валюта
 };
 
 // Стан додатку
@@ -135,18 +135,16 @@ function handleDonate() {
     }
 
     // Розрахунок кількості "кав" для Buy Me a Coffee
-    // BMC працює з цілими числами "кав", де 1 кава = basePrice USD
-    // Приблизний курс UAH/USD для розрахунку (можна налаштувати)
-    const usdRate = 37; // 1 USD ≈ 37 UAH (оновіть під актуальний курс)
-    const amountInUSD = selectedAmount / usdRate;
-    const coffeeCount = Math.ceil(amountInUSD / CONFIG.basePrice);
+    // BMC працює з цілими числами "кав", де 1 кава = $1
+    // Передаємо суму напряму як кількість кав
+    const coffeeCount = Math.ceil(selectedAmount / CONFIG.basePrice);
 
     // URL для Buy Me a Coffee
     const bmcUrl = `https://www.buymeacoffee.com/${CONFIG.bmcUsername}?amount=${coffeeCount}`;
 
     console.log('Donate clicked:', {
         selectedAmount,
-        amountInUSD: amountInUSD.toFixed(2),
+        currency: CONFIG.currency,
         coffeeCount,
         bmcUrl
     });

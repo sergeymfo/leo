@@ -21,25 +21,25 @@
         </div>
 
         <div class="amounts">
+            <button class="amount-button" data-amount="5">
+                <span class="amount">5</span>
+                <span class="currency">$</span>
+            </button>
+            <button class="amount-button" data-amount="10">
+                <span class="amount">10</span>
+                <span class="currency">$</span>
+            </button>
+            <button class="amount-button" data-amount="25">
+                <span class="amount">25</span>
+                <span class="currency">$</span>
+            </button>
             <button class="amount-button" data-amount="50">
                 <span class="amount">50</span>
-                <span class="currency">₴</span>
+                <span class="currency">$</span>
             </button>
             <button class="amount-button" data-amount="100">
                 <span class="amount">100</span>
-                <span class="currency">₴</span>
-            </button>
-            <button class="amount-button" data-amount="250">
-                <span class="amount">250</span>
-                <span class="currency">₴</span>
-            </button>
-            <button class="amount-button" data-amount="500">
-                <span class="amount">500</span>
-                <span class="currency">₴</span>
-            </button>
-            <button class="amount-button" data-amount="1000">
-                <span class="amount">1000</span>
-                <span class="currency">₴</span>
+                <span class="currency">$</span>
             </button>
         </div>
 
@@ -50,15 +50,15 @@
                     type="number"
                     id="customAmount"
                     placeholder="Введіть суму"
-                    min="10"
-                    max="10000"
+                    min="1"
+                    max="1000"
                 >
-                <span class="currency-label">₴</span>
+                <span class="currency-label">$</span>
             </div>
         </div>
 
         <div class="selected-info">
-            <p>Обрана сума: <strong id="selectedAmount">0</strong> ₴</p>
+            <p>Обрана сума: <strong id="selectedAmount">0</strong> $</p>
         </div>
 
         <button class="donate-button" id="donateButton" disabled>
