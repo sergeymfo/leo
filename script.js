@@ -144,6 +144,11 @@ function handleDonate() {
         return;
     }
 
+    // Генеруємо унікальний payment ID для відстеження
+    const userId = tg ? tg.initDataUnsafe?.user?.id : null;
+    const timestamp = Date.now();
+    const paymentId = userId ? `${userId}_${timestamp}` : `guest_${timestamp}`;
+
     // Перевіряємо чи є direct link до extra для цієї суми
     const extraLink = CONFIG.extrasLinks[selectedAmount];
 
@@ -161,28 +166,44 @@ function handleDonate() {
     console.log('Donate clicked:', {
         selectedAmount,
         currency: CONFIG.currency,
+        paymentId,
+        userId,
         hasExtraLink: !!extraLink,
         bmcUrl
     });
 
-    // Відправка даних до бота (якщо потрібно)
+    // Відправка даних до бота (ОБОВ'ЯЗКОВО!)
+    // Бот збереже pending payment в БД
     if (tg) {
         tg.sendData(JSON.stringify({
+            action: 'init_payment',
+            payment_id: paymentId,
             amount: selectedAmount,
             currency: CONFIG.currency,
-            extraLink: extraLink || null
+            user_id: userId,
+            timestamp: timestamp
         }));
+
+        console.log('Payment data sent to bot');
+    }
+
+    // Показуємо користувачу payment ID (ВАЖЛИВО для webhook)
+    // Користувач має вказати його в "Say something nice" полі
+    if (tg && userId) {
+        tg.showAlert(
+            `💡 Важливо!\n\n` +
+            `Після оплати в полі "Say something nice" вкажіть:\n` +
+            `${paymentId}\n\n` +
+            `Це потрібно для автоматичного зарахування бонусів.`
+        );
     }
 
     // Відкриття Buy Me a Coffee
-    window.open(bmcUrl, '_blank');
-
-    // Закриття Web App після невеликої затримки
     setTimeout(() => {
-        if (tg) {
-            tg.close();
-        }
-    }, 1000);
+        window.open(bmcUrl, '_blank');
+    }, tg ? 2000 : 0); // Даємо час прочитати повідомлення
+
+    // НЕ закриваємо Web App одразу - користувач може повернутись
 }
 
 // Показати помилку
