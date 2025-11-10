@@ -12,6 +12,8 @@ from aiogram.types import Message
 from aiohttp import web
 import json
 import logging
+import hmac
+import hashlib
 from datetime import datetime, timedelta
 
 router = Router()
@@ -72,23 +74,48 @@ async def bmc_webhook_handler(request):
     Обробка webhooks від Buy Me a Coffee
 
     Налаштування webhook в BMC:
-    1. https://buymeacoffee.com/fwdr/integrations
-    2. Webhooks → Add webhook
+    1. https://www.buymeacoffee.com/webhooks
+    2. Create New Webhook
     3. URL: https://your-domain.com/bmc-webhook
-    4. Events: New supporter, New membership
+    4. Events: Purchases, Extras, Memberships
+    5. Зберегти SECRET KEY з налаштувань webhook
     """
     try:
-        data = await request.json()
+        # Отримуємо body та signature
+        body = await request.read()
+        signature = request.headers.get('X-BMC-Signature', '')
 
+        # ВАЖЛИВО: Перевірка підпису для безпеки
+        # Отримайте SECRET KEY з BMC webhook settings
+        webhook_secret = request.app.get('bmc_webhook_secret', '')
+
+        if webhook_secret:
+            # Створюємо HMAC SHA256 підпис
+            expected_signature = hmac.new(
+                webhook_secret.encode('utf-8'),
+                body,
+                hashlib.sha256
+            ).hexdigest()
+
+            # Перевіряємо підпис
+            if not hmac.compare_digest(signature, expected_signature):
+                logger.warning("Invalid webhook signature!")
+                return web.Response(
+                    text=json.dumps({'status': 'error', 'message': 'Invalid signature'}),
+                    status=401,
+                    content_type='application/json'
+                )
+
+        data = json.loads(body)
         logger.info(f"BMC Webhook received: {json.dumps(data)}")
 
-        # Дані від BMC
-        supporter_name = data.get('supporter_name')
-        supporter_email = data.get('supporter_email')
-        support_note = data.get('support_note', '')
-        support_coffees = data.get('support_coffees', 1)
-        support_price = data.get('support_coffee_price', 5)
-        total_amount = float(support_coffees) * float(support_price)
+        # Дані від BMC (офіційний формат з 'response' об'єктом)
+        response = data.get('response', {})
+
+        supporter_name = response.get('supporter_name', 'Anonymous')
+        supporter_email = response.get('supporter_email', '')
+        support_note = response.get('support_note', '')
+        total_amount = float(response.get('total_amount', 0))
 
         logger.info(f"Payment received: ${total_amount} from {supporter_name}")
 
@@ -158,12 +185,18 @@ async def bmc_webhook_handler(request):
 # 3. SETUP WEB SERVER
 # ====================
 
-async def setup_webhook_server(bot: Bot, port: int = 8080):
+async def setup_webhook_server(bot: Bot, port: int = 8080, bmc_webhook_secret: str = ''):
     """
     Налаштування веб-сервера для webhooks
+
+    Args:
+        bot: Bot instance
+        port: Порт для webhook сервера
+        bmc_webhook_secret: SECRET KEY з BMC webhook settings (для перевірки підпису)
     """
     app = web.Application()
     app['bot'] = bot  # Зберігаємо bot instance
+    app['bmc_webhook_secret'] = bmc_webhook_secret  # Зберігаємо secret key
 
     # Додаємо route для BMC webhook
     app.router.add_post('/bmc-webhook', bmc_webhook_handler)
@@ -246,15 +279,21 @@ async def main():
     Приклад інтеграції в бота
     """
     from aiogram import Dispatcher
+    import os
 
-    bot = Bot(token="YOUR_BOT_TOKEN")
+    bot = Bot(token=os.getenv("BOT_TOKEN", "YOUR_BOT_TOKEN"))
     dp = Dispatcher()
 
     # Реєструємо роутер
     dp.include_router(router)
 
     # Запускаємо webhook server
-    await setup_webhook_server(bot, port=8080)
+    # ВАЖЛИВО: BMC_WEBHOOK_SECRET отримайте з https://www.buymeacoffee.com/webhooks
+    await setup_webhook_server(
+        bot,
+        port=8080,
+        bmc_webhook_secret=os.getenv("BMC_WEBHOOK_SECRET", "")
+    )
 
     # Запускаємо бота
     await dp.start_polling(bot)
