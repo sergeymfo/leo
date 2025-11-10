@@ -4,7 +4,17 @@ const CONFIG = {
     basePrice: 1,        // Базова ціна "кави" на BMC ($1)
     minAmount: 1,        // Мінімальна сума в доларах
     maxAmount: 1000,     // Максимальна сума в доларах
-    currency: 'USD'      // Валюта
+    currency: 'USD',     // Валюта
+
+    // Direct links до BMC Extras для кожної суми
+    // Створіть extras на https://buymeacoffee.com/fwdr/shop
+    extrasLinks: {
+        5: null,    // Поки не створено
+        10: 'https://buymeacoffee.com/fwdr/e/477543', // ✅ Створено
+        25: null,   // Поки не створено
+        50: null,   // Поки не створено
+        100: null   // Поки не створено
+    }
 };
 
 // Стан додатку
@@ -134,18 +144,24 @@ function handleDonate() {
         return;
     }
 
-    // Розрахунок кількості "кав" для Buy Me a Coffee
-    // BMC працює з цілими числами "кав", де 1 кава = $1
-    // Передаємо суму напряму як кількість кав
-    const coffeeCount = Math.ceil(selectedAmount / CONFIG.basePrice);
+    // Перевіряємо чи є direct link до extra для цієї суми
+    const extraLink = CONFIG.extrasLinks[selectedAmount];
 
-    // URL для Buy Me a Coffee
-    const bmcUrl = `https://www.buymeacoffee.com/${CONFIG.bmcUsername}?amount=${coffeeCount}`;
+    let bmcUrl;
+    if (extraLink) {
+        // Використовуємо direct link до extra (сума вже встановлена в extra)
+        bmcUrl = extraLink;
+        console.log('Using direct extra link');
+    } else {
+        // Fallback: відкриваємо загальний профіль
+        bmcUrl = `https://www.buymeacoffee.com/${CONFIG.bmcUsername}`;
+        console.log('Extra not configured, using profile link');
+    }
 
     console.log('Donate clicked:', {
         selectedAmount,
         currency: CONFIG.currency,
-        coffeeCount,
+        hasExtraLink: !!extraLink,
         bmcUrl
     });
 
@@ -154,7 +170,7 @@ function handleDonate() {
         tg.sendData(JSON.stringify({
             amount: selectedAmount,
             currency: CONFIG.currency,
-            coffeeCount: coffeeCount
+            extraLink: extraLink || null
         }));
     }
 
