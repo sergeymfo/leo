@@ -1,1 +1,76 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leo Donation</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="avatar">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" fill="#5865F2"></circle>
+                    <text x="50" y="65" font-size="50" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold">L</text>
+                </svg>
+            </div>
+            <h1>Підтримати Leo</h1>
+            <p class="subtitle">Виберіть суму для підтримки проекту</p>
+        </div>
 
+        <div class="amounts">
+            <button class="amount-button" data-amount="5">
+                <span class="amount">5</span>
+                <span class="currency">$</span>
+            </button>
+            <button class="amount-button" data-amount="10">
+                <span class="amount">10</span>
+                <span class="currency">$</span>
+            </button>
+            <button class="amount-button" data-amount="25">
+                <span class="amount">25</span>
+                <span class="currency">$</span>
+            </button>
+            <button class="amount-button" data-amount="50">
+                <span class="amount">50</span>
+                <span class="currency">$</span>
+            </button>
+            <button class="amount-button" data-amount="100">
+                <span class="amount">100</span>
+                <span class="currency">$</span>
+            </button>
+        </div>
+
+        <div class="custom-amount">
+            <label for="customAmount">Або введіть свою суму:</label>
+            <div class="input-group">
+                <input type="number" id="customAmount" placeholder="Введіть суму" min="1" max="1000">
+                <span class="currency-label">$</span>
+            </div>
+        </div>
+
+        <div class="selected-info">
+            <p>Обрана сума: <strong id="selectedAmount">0</strong> $</p>
+        </div>
+
+        <button class="donate-button" id="donateButton" disabled>
+            💝 Підтримати проект
+        </button>
+
+        <div class="info">
+            <p class="info-text">
+                Оплата через Buy Me a Coffee<br>
+                Безпечно • Швидко • Зручно
+            </p>
+        </div>
+
+        <button class="close-button" id="closeButton">
+            ✕ Закрити
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
